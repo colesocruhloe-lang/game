@@ -19,6 +19,7 @@ const mapCtx = mapCanvas.getContext("2d");
 let scene, camera, renderer, clock;
 let player, playerBody, weapon, vehicle = null;
 let inVehicle = false, crouched = false, jumping = false;
+let cameraYaw = 0, cameraPitch = 0.18;
 let hp=100, armor=50, cash=2450, ammo=18, wanted=0;
 let missionProgress=0, fireCooldown=0, damageCooldown=0;
 const keys = new Set();
@@ -70,6 +71,7 @@ function init(){
   buildPlayer();
   buildCars();
   buildNPCs();
+  cameraYaw=player.rotation.y;
   setupInput();
   resize();
 
@@ -133,7 +135,7 @@ function buildCity(){
 
 function buildPlayer(){
   player=new THREE.Group();
-  player.position.set(0,0,18);
+  player.position.set(0,0,28);
   playerBody=box(1.1,1.8,.65,mat(0x17212b),0,1,0); player.add(playerBody);
   const head=cyl(.34,.5,mat(0xc68f6c),0,2.18,0); player.add(head);
   const jacket=box(1.18,.85,.7,mat(0x2d3f52),0,1.25,0); player.add(jacket);
@@ -188,7 +190,13 @@ function setupInput(){
     keys.delete(e.code);
     if(e.code==="ControlLeft"||e.code==="ControlRight"){crouched=false; player.scale.y=1;}
   });
-  addEventListener("mousedown",e=>{ if(e.button===0) shoot(); });
+  addEventListener("mousedown",e=>{ if(e.button===0){ if(document.pointerLockElement!==canvas) canvas.requestPointerLock?.(); shoot(); } });
+  addEventListener("mousemove",e=>{
+    if(document.pointerLockElement===canvas){
+      cameraYaw -= e.movementX*0.0025;
+      cameraPitch = THREE.MathUtils.clamp(cameraPitch - e.movementY*0.0016,-0.05,0.48);
+    }
+  });
   addEventListener("resize",resize);
 }
 function enterVehicle(){
@@ -207,6 +215,8 @@ function shoot(){
   if(inVehicle||fireCooldown>0||ammo<=0) return;
   ammo--; ammoEl.textContent=ammo; fireCooldown=.12; wanted=Math.min(5,wanted+0.03);
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion).normalize();
+  const flatDir=new THREE.Vector3(dir.x,0,dir.z);
+  if(flatDir.lengthSq()>0&&!inVehicle) player.rotation.y=Math.atan2(flatDir.x,flatDir.z);
   const start=player.position.clone().add(new THREE.Vector3(0,1.35,0)).add(dir.clone().multiplyScalar(1.1));
   const mesh=new THREE.Mesh(new THREE.SphereGeometry(.055,6,6),mat(0xffd36b,.25,.6)); mesh.position.copy(start); scene.add(mesh);
   bullets.push({mesh,vel:dir.multiplyScalar(85),life:1.5});
@@ -225,13 +235,24 @@ function updatePlayer(dt){
     vehicle.position.addScaledVector(dir,vehicle.userData.speed*dt);
     vehicle.position.x=THREE.MathUtils.clamp(vehicle.position.x,-WORLD/2+8,WORLD/2-8);
     vehicle.position.z=THREE.MathUtils.clamp(vehicle.position.z,-WORLD/2+8,WORLD/2-8);
-    player.position.copy(vehicle.position); return;
+    player.position.copy(vehicle.position);
+    player.rotation.y=vehicle.rotation.y;
+    return;
   }
-  const f=new THREE.Vector3((keys.has("KeyD")?1:0)-(keys.has("KeyA")?1:0),0,(keys.has("KeyS")?1:0)-(keys.has("KeyW")?1:0));
-  if(f.lengthSq()>0) f.normalize();
-  const speed=keys.has("ShiftLeft")||keys.has("ShiftRight")?8.5:4.8;
-  player.position.addScaledVector(f,speed*dt);
-  if(f.lengthSq()>0) player.rotation.y=Math.atan2(f.x,f.z);
+  const ix=(keys.has("KeyD")?1:0)-(keys.has("KeyA")?1:0);
+  const iz=(keys.has("KeyS")?1:0)-(keys.has("KeyW")?1:0);
+  const input=new THREE.Vector2(ix,iz);
+  if(input.lengthSq()>0){
+    input.normalize();
+    const forward=new THREE.Vector3(Math.sin(cameraYaw),0,Math.cos(cameraYaw));
+    const right=new THREE.Vector3(Math.cos(cameraYaw),0,-Math.sin(cameraYaw));
+    const move=forward.multiplyScalar(-input.y).add(right.multiplyScalar(input.x)).normalize();
+    const speed=keys.has("ShiftLeft")||keys.has("ShiftRight")?8.5:4.8;
+    player.position.addScaledVector(move,speed*dt);
+    const desiredYaw=Math.atan2(move.x,move.z);
+    let diff=THREE.MathUtils.euclideanModulo(desiredYaw-player.rotation.y+Math.PI,Math.PI*2)-Math.PI;
+    player.rotation.y+=diff*Math.min(1,dt*14);
+  }
   player.position.x=THREE.MathUtils.clamp(player.position.x,-WORLD/2+5,WORLD/2-5);
   player.position.z=THREE.MathUtils.clamp(player.position.z,-WORLD/2+5,WORLD/2-5);
   if(jumping){player.position.y+=7*dt;if(player.position.y>1.9){player.position.y=1.9;jumping=false}}
@@ -258,10 +279,20 @@ function updateParticles(dt){
 }
 function updateCamera(dt){
   const focus=inVehicle?vehicle.position:player.position;
-  const yaw=player.rotation.y;
-  const desired=new THREE.Vector3(Math.sin(yaw)*6,3.6,Math.cos(yaw)*6).add(focus);
-  camera.position.lerp(desired,1-Math.pow(.001,dt));
-  camera.lookAt(focus.x,focus.y+(inVehicle?1.2:1.35),focus.z);
+  const distance=inVehicle?9.5:7.0;
+  const height=inVehicle?4.0:3.25;
+  const horizontal=Math.cos(cameraPitch)*distance;
+  const desired=new THREE.Vector3(
+    focus.x-Math.sin(cameraYaw)*horizontal,
+    focus.y+height+Math.sin(cameraPitch)*distance,
+    focus.z-Math.cos(cameraYaw)*horizontal
+  );
+  camera.position.lerp(desired,1-Math.pow(.0008,dt));
+  const lookTarget=focus.clone();
+  lookTarget.y+=inVehicle?1.25:1.35;
+  lookTarget.x+=Math.sin(cameraYaw)*1.4;
+  lookTarget.z+=Math.cos(cameraYaw)*1.4;
+  camera.lookAt(lookTarget);
 }
 function updateUI(){
   hpEl.textContent=Math.max(0,Math.round(hp)); armorEl.textContent=Math.max(0,Math.round(armor)); wantedEl.textContent="★".repeat(Math.ceil(wanted))+"☆".repeat(5-Math.ceil(wanted));
