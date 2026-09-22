@@ -1,16 +1,18 @@
-# Open City — v2 gameplay prototype
+# Urban Clash
 
-Added systems:
-- pistol shooting and ammo/reload
-- civilian, gang and shopkeeper NPCs
-- wanted level and police pursuit
-- starter mission flow
-- garages and shops as world locations
-- pickups, money and inventory
-- save/load with localStorage (F5/F9)
-- medkit use with I
-- crouch changed to CTRL (left/right Ctrl)
-- mobile action controls remain available
+Браузерный 3D-прототип командной игры в открытом городе.
 
-Controls:
-WASD move · Shift sprint · Ctrl crouch · Space jump · E interact · F vehicle exit · LMB fire · R reload · I medkit · F5 save · F9 load.
+## Управление
+- WASD — движение / управление машиной
+- SHIFT — бег
+- CTRL — приседание
+- SPACE — прыжок / подъём транспорта
+- F или E — сесть в машину / выйти
+- ЛКМ — стрельба
+- мышь — камера
+- TAB — таблица счёта
+
+## Запуск
+Проект рассчитан на GitHub Pages и обычный статический хостинг. Интернет нужен для загрузки Three.js с CDN.
+
+На GitHub Pages достаточно загрузить содержимое репозитория и включить Pages для ветки с `index.html`.
