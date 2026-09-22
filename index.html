@@ -1,4 +1,67 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Urban Clash</title><link rel="stylesheet" href="./style.css"></head><body>
-<div id="hud"><div class="top"><b>URBAN CLASH</b><span id="team"></span><span>❤️ <i id="hp">100</i></span><span class="muted">TAB — игроки</span><span class="muted" id="net">OFFLINE</span></div>
-<div id="board" class="hide"><h2>ИГРОКИ</h2><div id="rows"></div></div><div id="cross">+</div><div id="hint">WASD движение · SHIFT бег · CTRL присесть · SPACE прыжок · E/F транспорт · ЛКМ оружие</div><div id="toast"></div></div>
-<div id="load">Подключение к игре…</div><script type="module" src="./main.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#071018">
+  <title>Urban Clash — Vice District</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div class="topbar">
+      <div class="brand">URBAN CLASH <span>VICE DISTRICT</span></div>
+      <div class="stat"><small>HEALTH</small><strong id="hp">100</strong></div>
+      <div class="stat"><small>ARMOR</small><strong id="armor">50</strong></div>
+      <div class="stat"><small>CASH</small><strong id="cash">$2,450</strong></div>
+      <div class="stat"><small>WANTED</small><strong id="wanted">☆☆☆☆☆</strong></div>
+    </div>
+
+    <div id="mission">
+      <div class="mission-kicker">CURRENT OBJECTIVE</div>
+      <div id="missionText">Доберитесь до отмеченной точки</div>
+      <div class="progress"><i id="missionProgress"></i></div>
+    </div>
+
+    <div id="crosshair">+</div>
+    <div id="vehiclePrompt" class="glass hidden">E — сесть в автомобиль</div>
+    <div id="toast"></div>
+
+    <div id="minimap" class="glass">
+      <canvas id="map" width="190" height="190"></canvas>
+      <div class="map-label">VICE DISTRICT</div>
+    </div>
+
+    <div id="weapon">
+      <div class="weapon-name">COMPACT 9</div>
+      <div class="ammo"><b id="ammo">18</b> / 108</div>
+    </div>
+
+    <div id="controls" class="glass">
+      <b>WASD</b> move &nbsp; <b>SHIFT</b> sprint &nbsp; <b>SPACE</b> jump &nbsp;
+      <b>CTRL</b> crouch &nbsp; <b>E</b> vehicle &nbsp; <b>F</b> exit &nbsp; <b>LMB</b> fire &nbsp; <b>TAB</b> stats
+    </div>
+
+    <div id="scoreboard" class="glass hidden">
+      <h2>PLAYERS</h2>
+      <div class="row"><span>YOU</span><b>2,450</b><em>ONLINE</em></div>
+      <div class="row"><span>NightRunner</span><b>1,980</b><em>ONLINE</em></div>
+      <div class="row"><span>MiamiKid</span><b>1,420</b><em>ONLINE</em></div>
+      <div class="row"><span>Sunset</span><b>860</b><em>ONLINE</em></div>
+    </div>
+
+    <div id="loading">
+      <div class="loader-ring"></div>
+      <div class="loading-title">URBAN CLASH</div>
+      <div class="loading-sub">VICE DISTRICT</div>
+      <div class="loading-status" id="loadingStatus">Инициализация 3D мира…</div>
+    </div>
+
+    <div id="damage"></div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
