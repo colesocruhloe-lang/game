@@ -1,67 +1,159 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#071018">
-  <title>Urban Clash — Vice District</title>
-  <link rel="stylesheet" href="./style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#071018">
+<title>Urban Clash — Vice District</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#030507;color:#fff;font-family:Inter,Arial,sans-serif}canvas{display:block;width:100vw;height:100vh;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none}.bar{position:absolute;left:0;right:0;top:0;height:90px;padding:17px 22px;display:flex;gap:24px;align-items:flex-start;background:linear-gradient(#03070bd9,transparent)}
+.brand{font-size:18px;font-weight:950;letter-spacing:.13em}.brand i{display:block;color:#8cbde0;font-size:9px;font-style:normal;letter-spacing:.42em;margin-top:4px}
+.stat small{display:block;color:#8d9aa5;font-size:8px;letter-spacing:.18em}.stat b{font-size:15px}.wanted{color:#ffd15a}
+#mission{position:absolute;top:103px;left:22px;width:300px;padding:11px 14px;border-left:2px solid #9ed5ff;background:linear-gradient(90deg,#071018e8,transparent)}#mission small{font-size:8px;color:#91a0ac;letter-spacing:.18em}#mission strong{display:block;font-size:13px;margin-top:5px}
+#mission .meter{height:2px;background:#ffffff12;margin-top:9px}.meter span{display:block;width:35%;height:100%;background:#8ed1ff}
+#cross{position:absolute;left:50%;top:50%;font-size:21px;transform:translate(-50%,-50%);text-shadow:0 0 9px #000}
+#weapon{position:absolute;right:23px;bottom:32px;text-align:right}.weapon-name{font-size:12px;font-weight:900;letter-spacing:.12em}.ammo{font-size:28px;font-weight:950}.ammo small{font-size:11px;color:#8997a3}
+#hint{position:absolute;left:50%;bottom:13px;transform:translateX(-50%);font-size:9px;color:#aeb9c2;background:#071018aa;border:1px solid #ffffff12;padding:7px 10px;white-space:nowrap}
+#map{position:absolute;right:18px;top:92px;width:188px;height:188px;border:1px solid #ffffff22;background:#071018df;box-shadow:0 15px 45px #0007}
+#prompt{display:none;position:absolute;left:50%;bottom:120px;transform:translateX(-50%);background:#071018ed;border:1px solid #ffffff20;padding:10px 15px;font-size:11px;font-weight:800}
+#toast{position:absolute;left:50%;top:28%;transform:translateX(-50%);font-size:13px;font-weight:950;letter-spacing:.12em;text-shadow:0 3px 18px #000;opacity:0;transition:opacity .2s}
+#board{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;padding:20px;background:#071018f0;border:1px solid #ffffff1c;box-shadow:0 20px 80px #0009}.row{display:grid;grid-template-columns:1fr 80px 70px;padding:10px 0;border-top:1px solid #ffffff10;font-size:12px}.row em{color:#72d09a;font-style:normal;font-size:9px}
+#loading{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 34%,#234258,#0a1118 45%,#020304 100%);transition:opacity .6s}.ring{width:40px;height:40px;border:2px solid #ffffff16;border-top-color:#9fd7ff;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:17px}.lt{font-size:34px;font-weight:950;letter-spacing:.15em}.ls{font-size:10px;letter-spacing:.44em;color:#91bad6;margin:4px 0 19px}.status{font-size:10px;color:#85929c}@keyframes spin{to{transform:rotate(360deg)}}
+#touch{display:none;position:absolute;inset:0}.touchbtn{position:absolute;border:1px solid #fff3;background:#07101888;color:#fff;border-radius:50%;width:54px;height:54px;text-align:center;line-height:54px;font-size:12px;pointer-events:auto;backdrop-filter:blur(4px)}#up{left:70px;bottom:138px}#left{left:12px;bottom:84px}#down{left:70px;bottom:30px}#right{left:128px;bottom:84px}#fire{right:20px;bottom:72px;width:72px;height:72px;line-height:72px}#carbtn{right:103px;bottom:30px}
+@media(max-width:760px){.bar{padding:9px 11px;gap:9px}.brand{font-size:12px}.brand i{font-size:7px}.stat small{font-size:6px}.stat b{font-size:10px}#mission{top:65px;left:10px;width:220px}#map{top:67px;right:8px;width:135px;height:135px}#hint{display:none}#touch{display:block}.weapon{right:12px}.ammo{font-size:23px}.lt{font-size:24px}}
+</style>
 </head>
 <body>
-  <canvas id="game"></canvas>
+<canvas id="game"></canvas>
+<div id="ui">
+ <div class="bar">
+  <div class="brand">URBAN CLASH<i>VICE DISTRICT</i></div>
+  <div class="stat"><small>HEALTH</small><b id="hp">100</b></div>
+  <div class="stat"><small>ARMOR</small><b id="armor">50</b></div>
+  <div class="stat"><small>CASH</small><b id="cash">$2,450</b></div>
+  <div class="stat"><small>WANTED</small><b class="wanted" id="wanted">☆☆☆☆☆</b></div>
+ </div>
+ <div id="mission"><small>CURRENT OBJECTIVE</small><strong id="missionText">Доберитесь до жёлтой отметки</strong><div class="meter"><span id="meter"></span></div></div>
+ <canvas id="map" width="188" height="188"></canvas>
+ <div id="cross">+</div><div id="prompt">E — сесть в автомобиль</div><div id="toast"></div>
+ <div id="weapon"><div class="weapon-name">COMPACT 9</div><div class="ammo"><span id="ammo">18</span> <small>/ 108</small></div></div>
+ <div id="hint">WASD движение · SHIFT бег · SPACE прыжок · E/F авто · ЛКМ огонь · TAB игроки</div>
+ <div id="board"><h2>PLAYERS</h2><div class="row"><span>YOU</span><b>2,450</b><em>ONLINE</em></div><div class="row"><span>NightRunner</span><b>1,980</b><em>ONLINE</em></div><div class="row"><span>ViceKid</span><b>1,420</b><em>ONLINE</em></div><div class="row"><span>Sunset</span><b>860</b><em>ONLINE</em></div></div>
+ <div id="touch"><div class="touchbtn" id="up">▲</div><div class="touchbtn" id="left">◀</div><div class="touchbtn" id="down">▼</div><div class="touchbtn" id="right">▶</div><div class="touchbtn" id="fire">FIRE</div><div class="touchbtn" id="carbtn">CAR</div></div>
+ <div id="loading"><div class="ring"></div><div class="lt">URBAN CLASH</div><div class="ls">VICE DISTRICT</div><div class="status" id="loadStatus">Проверка игрового движка…</div></div>
+</div>
 
-  <div id="hud">
-    <div class="topbar">
-      <div class="brand">URBAN CLASH <span>VICE DISTRICT</span></div>
-      <div class="stat"><small>HEALTH</small><strong id="hp">100</strong></div>
-      <div class="stat"><small>ARMOR</small><strong id="armor">50</strong></div>
-      <div class="stat"><small>CASH</small><strong id="cash">$2,450</strong></div>
-      <div class="stat"><small>WANTED</small><strong id="wanted">☆☆☆☆☆</strong></div>
-    </div>
+<script>
+'use strict';
+(() => {
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
+const map=document.getElementById('map'),mctx=map.getContext('2d');
+let W=innerWidth,H=innerHeight,D=Math.min(devicePixelRatio||1,2);
+function resize(){W=innerWidth;H=innerHeight;canvas.width=W*D;canvas.height=H*D;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(D,0,0,D,0,0)}addEventListener('resize',resize);resize();
 
-    <div id="mission">
-      <div class="mission-kicker">CURRENT OBJECTIVE</div>
-      <div id="missionText">Доберитесь до отмеченной точки</div>
-      <div class="progress"><i id="missionProgress"></i></div>
-    </div>
+const WORLD={w:2400,h:1900,cell:120};
+const P={x:1120,y:980,z:0,ang:0,hp:100,armor:50,cash:2450,ammo:18,jump:0};
+const cam={x:P.x,y:P.y,z:0,zoom:1};
+const keys=new Set(),shots=[],fx=[],cars=[],npcs=[],buildings=[],trees=[],lights=[];
+const target={x:1760,y:520};let inCar=false,car=null,wanted=0,mission=0,shake=0;
+const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.opacity='1';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity='0',1700)}
+function road(x,y){return Math.abs((x%WORLD.cell)-WORLD.cell/2)<19||Math.abs((y%WORLD.cell)-WORLD.cell/2)<19}
+const buildingColors=['#26343d','#37454d','#4c4745','#394b43','#514c58','#303e55','#63574e'];
+for(let x=60;x<WORLD.w-60;x+=WORLD.cell)for(let y=60;y<WORLD.h-60;y+=WORLD.cell){
+ if(road(x,y)||Math.random()<.08)continue;
+ buildings.push({x:x+rand(-8,8),y:y+rand(-8,8),w:rand(58,94),h:rand(28,92),c:buildingColors[(Math.random()*buildingColors.length)|0]});
+}
+for(let i=0;i<110;i++){let x=rand(30,WORLD.w-30),y=rand(30,WORLD.h-30);if(!road(x,y))trees.push({x,y,s:rand(.8,1.35)})}
+for(let i=0;i<75;i++){const horiz=Math.random()<.5,lane=(Math.floor(rand(1,19))*WORLD.cell+WORLD.cell/2),pos=rand(30,WORLD.w-30);cars.push({x:horiz?pos:lane,y:horiz?lane:pos,ang:horiz?(Math.random()<.5?0:Math.PI):(Math.random()<.5?Math.PI/2:-Math.PI/2),speed:rand(18,42),color:['#bd8a29','#284366','#8b2e3b','#2e6059','#aaa69c','#4d3566'][i%6],npc:true})}
+const npcColors=['#334b64','#704236','#4b6247','#76623d','#583f61'];
+for(let i=0;i<70;i++)npcs.push({x:rand(30,WORLD.w-30),y:rand(30,WORLD.h-30),ang:rand(-Math.PI,Math.PI),speed:rand(9,20),t:rand(.2,3),color:npcColors[i%npcColors.length],hp:100});
+for(let i=0;i<100;i++)lights.push({x:Math.floor(rand(1,19))*WORLD.cell+WORLD.cell/2,y:Math.floor(rand(1,15))*WORLD.cell+WORLD.cell/2});
 
-    <div id="crosshair">+</div>
-    <div id="vehiclePrompt" class="glass hidden">E — сесть в автомобиль</div>
-    <div id="toast"></div>
+function proj(x,y,z=0){return{x:(x-cam.x)*cam.zoom+W/2,y:(y-cam.y)*cam.zoom+H/2-z*cam.zoom}}
+function circle(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+function drawPerson(o,player=false){
+ const p=proj(o.x,o.y,o.z||0),s=cam.zoom;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(o.ang||0);
+ circle(0,11*s,9*s,'#0007');ctx.fillStyle=o.color||'#314a60';ctx.fillRect(-7*s,-2*s,14*s,19*s);
+ circle(0,-9*s,7*s,player?'#c79270':'#b77d5c');ctx.fillStyle=player?'#172637':'#242424';ctx.fillRect(-8*s,-15*s,16*s,4*s);
+ ctx.fillStyle='#17191b';ctx.fillRect(6*s,3*s,20*s,4*s);ctx.restore()
+}
+function drawCar(o){
+ const p=proj(o.x,o.y),s=cam.zoom;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(o.ang);
+ ctx.shadowColor='#0008';ctx.shadowBlur=12;ctx.fillStyle='#080a0c';ctx.fillRect(-19*s,-32*s,38*s,64*s);ctx.shadowBlur=0;
+ ctx.fillStyle=o.color;ctx.fillRect(-16*s,-30*s,32*s,60*s);ctx.fillStyle='#172128';ctx.fillRect(-12*s,-13*s,24*s,25*s);
+ ctx.fillStyle='#9dc8d388';ctx.fillRect(-10*s,-11*s,20*s,8*s);ctx.fillRect(-10*s,3*s,20*s,8*s);
+ ctx.fillStyle='#090b0d';for(const y of[-24,24]){ctx.fillRect(-19*s,y*s,6*s,12*s);ctx.fillRect(13*s,y*s,6*s,12*s)}
+ ctx.fillStyle='#f8e4a8';ctx.fillRect(-10*s,-30*s,7*s,3*s);ctx.fillRect(3*s,-30*s,7*s,3*s);ctx.restore()
+}
+function drawBuilding(b){
+ const p=proj(b.x,b.y),s=cam.zoom,w=b.w*s,h=b.h*s;ctx.fillStyle='#080b0d';ctx.fillRect(p.x-w/2,p.y-b.w*s/2,w,b.w*s);
+ ctx.fillStyle=b.c;ctx.fillRect(p.x-w/2,p.y-b.w*s/2,w,b.w*s);
+ const rows=Math.max(2,Math.floor(b.w/16)),cols=Math.max(2,Math.floor(b.w/15));
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if((r*cols+c)%7===0)continue;ctx.fillStyle=((r+c)%4===0)?'#d5ae6370':'#8eb4c477';ctx.fillRect(p.x-w/2+7*s+c*(w-12*s)/cols,p.y-b.w*s/2+7*s+r*(b.w*s-12*s)/rows,4*s,7*s)}
+ ctx.fillStyle='#10171caa';ctx.fillRect(p.x+w/2-5*s,p.y-b.w*s/2-8*s,8*s,b.w*s+8*s)
+}
+function drawWorld(){
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#162b3a');g.addColorStop(.5,'#0b151c');g.addColorStop(1,'#070a0c');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // water district
+ const wx=1740,wy=250,ww=700,wh=500,q=proj(wx,wy);ctx.fillStyle='#0d3443';ctx.fillRect(q.x,q.y,ww*cam.zoom,wh*cam.zoom);
+ ctx.strokeStyle='#2b6573aa';for(let y=10;y<wh;y+=24){ctx.beginPath();ctx.moveTo(q.x,q.y+y*cam.zoom);ctx.lineTo(q.x+ww*cam.zoom,q.y+y*cam.zoom);ctx.stroke()}
+ // roads
+ ctx.fillStyle='#181e22';for(let x=WORLD.cell/2;x<WORLD.w;x+=WORLD.cell){let p=proj(x,0);ctx.fillRect(p.x-19*cam.zoom,0,38*cam.zoom,H)}
+ for(let y=WORLD.cell/2;y<WORLD.h;y+=WORLD.cell){let p=proj(0,y);ctx.fillRect(0,p.y-19*cam.zoom,W,38*cam.zoom)}
+ ctx.fillStyle='#c8b66a88';for(let x=WORLD.cell/2;x<WORLD.w;x+=WORLD.cell){let p=proj(x,0);for(let y=0;y<H;y+=42*cam.zoom)ctx.fillRect(p.x-1,y,2,18*cam.zoom)}
+ for(let y=WORLD.cell/2;y<WORLD.h;y+=WORLD.cell){let p=proj(0,y);for(let x=0;x<W;x+=42*cam.zoom)ctx.fillRect(x,p.y-1,18*cam.zoom,2)}
+ // ordered objects
+ const objs=[...buildings.map(o=>[o.y,0,o]),...cars.map(o=>[o.y,1,o]),...npcs.filter(o=>o.hp>0).map(o=>[o.y,2,o]),...trees.map(o=>[o.y,3,o])].sort((a,b)=>a[0]-b[0]);
+ for(const [,type,o] of objs){if(type===0)drawBuilding(o);else if(type===1)drawCar(o);else if(type===2)drawPerson(o);else{const p=proj(o.x,o.y),s=cam.zoom;circle(p.x,p.y+6*s,7*s,'#0006');ctx.fillStyle='#5a3f2b';ctx.fillRect(p.x-2*s,p.y-2*s,4*s,12*s);circle(p.x,p.y-4*s,12*s,'#28523a')}}
+ // objective
+ const t=proj(target.x,target.y);ctx.strokeStyle='#ffd15a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(t.x,t.y,17+Math.sin(performance.now()/150)*4,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffd15a';ctx.font='bold 10px Arial';ctx.fillText('OBJECTIVE',t.x-30,t.y-24);
+ for(const s of shots){const p=proj(s.x,s.y);circle(p.x,p.y,2.2*cam.zoom,'#ffd36a')}
+ for(const f of fx){const p=proj(f.x,f.y);circle(p.x,p.y,(1-f.life/f.max)*10*cam.zoom,'#eab46a55')}
+ drawPerson(P,true);
+ const vign=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.2,W/2,H/2,Math.max(W,H)*.78);vign.addColorStop(0,'transparent');vign.addColorStop(1,'#0008');ctx.fillStyle=vign;ctx.fillRect(0,0,W,H)
+}
+function update(dt){
+ if(inCar){
+  car.speed+=(keys.has('KeyW')?1:0)*140*dt-(keys.has('KeyS')?1:0)*130*dt;car.speed*=Math.pow(.965,dt*60);car.speed=clamp(car.speed,-70,190);
+  car.ang+=((keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0))*dt*(.8+Math.abs(car.speed)/150);
+  car.x+=Math.sin(car.ang)*car.speed*dt;car.y+=Math.cos(car.ang)*car.speed*dt;car.x=clamp(car.x,25,WORLD.w-25);car.y=clamp(car.y,25,WORLD.h-25);
+  P.x=car.x;P.y=car.y;P.ang=car.ang;
+ }else{
+  let x=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),y=(keys.has('KeyS')?1:0)-(keys.has('KeyW')?1:0);
+  if(x||y){let l=Math.hypot(x,y);x/=l;y/=l;let sp=(keys.has('ShiftLeft')||keys.has('ShiftRight'))?135:82;P.x+=x*sp*dt;P.y+=y*sp*dt;P.ang=Math.atan2(x,y)}
+  if(P.jump>0){P.jump-=dt;P.z=Math.max(0,Math.sin(P.jump/.7*Math.PI)*36)}else P.z=0;
+  P.x=clamp(P.x,20,WORLD.w-20);P.y=clamp(P.y,20,WORLD.h-20)
+ }
+ for(const c of cars){if(c===car)continue;c.x+=Math.sin(c.ang)*c.speed*dt;c.y+=Math.cos(c.ang)*c.speed*dt;if(c.x<15||c.x>WORLD.w-15||c.y<15||c.y>WORLD.h-15)c.ang+=Math.PI}
+ for(const n of npcs){if(n.hp<=0)continue;n.t-=dt;if(n.t<=0){n.t=rand(.7,2.8);n.ang=rand(-Math.PI,Math.PI)}n.x+=Math.sin(n.ang)*n.speed*dt;n.y+=Math.cos(n.ang)*n.speed*dt;if(n.x<20||n.x>WORLD.w-20||n.y<20||n.y>WORLD.h-20)n.ang+=Math.PI}
+ for(let i=shots.length-1;i>=0;i--){let s=shots[i];s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;for(const n of npcs){if(n.hp>0&&Math.hypot(n.x-s.x,n.y-s.y)<13){n.hp-=100;P.cash+=50;break}}if(s.life<=0)shots.splice(i,1)}
+ for(let i=fx.length-1;i>=0;i--){fx[i].life-=dt;if(fx[i].life<=0)fx.splice(i,1)}
+ mission=Math.min(1,mission+dt*.012);document.getElementById('meter').style.width=(mission*100)+'%';
+ if(d(P,target)<65){P.cash+=500;toast('ЦЕЛЬ ВЫПОЛНЕНА  +$500');target.x=rand(180,2050);target.y=rand(180,1600);mission=0}
+ wanted=Math.max(0,wanted-dt*.008);
+ cam.x+=(P.x-cam.x)*Math.min(1,dt*5);cam.y+=(P.y-cam.y)*Math.min(1,dt*5);
+ const z=clamp(Math.min(W,H)/850,.8,1.25);cam.zoom+=(z-cam.zoom)*dt*2;
+ ui()
+}
+function ui(){
+ document.getElementById('hp').textContent=Math.round(P.hp);document.getElementById('armor').textContent=Math.round(P.armor);document.getElementById('cash').textContent='$'+P.cash.toLocaleString();document.getElementById('ammo').textContent=P.ammo;
+ document.getElementById('wanted').textContent='★'.repeat(Math.ceil(wanted))+'☆'.repeat(5-Math.ceil(wanted));
+ document.getElementById('missionText').textContent=d(P,target)<250?'Доберитесь до жёлтой отметки — вы почти у цели':'Следуйте к жёлтой отметке на карте';
+ let near=null,md=70;for(const c of cars){let q=d(P,c);if(q<md){md=q;near=c}}document.getElementById('prompt').style.display=near&&!inCar?'block':'none'
+}
+function mapDraw(){mctx.clearRect(0,0,188,188);mctx.fillStyle='#071018';mctx.fillRect(0,0,188,188);mctx.fillStyle='#202a2e';for(let x=0;x<WORLD.w;x+=WORLD.cell)mctx.fillRect(x/WORLD.w*188,0,6,188);for(let y=0;y<WORLD.h;y+=WORLD.cell)mctx.fillRect(0,y/WORLD.h*188,188,6);mctx.fillStyle='#0e3a4a';mctx.fillRect(1740/WORLD.w*188,250/WORLD.h*188,700/WORLD.w*188,500/WORLD.h*188);mctx.fillStyle='#ffd15a';mctx.beginPath();mctx.arc(target.x/WORLD.w*188,target.y/WORLD.h*188,3,0,Math.PI*2);mctx.fill();mctx.fillStyle='#83caff';mctx.beginPath();mctx.arc(P.x/WORLD.w*188,P.y/WORLD.h*188,4,0,Math.PI*2);mctx.fill()}
+function shoot(){if(inCar||P.ammo<=0)return;P.ammo--;wanted=Math.min(5,wanted+.22);shots.push({x:P.x+Math.sin(P.ang)*18,y:P.y+Math.cos(P.ang)*18,vx:Math.sin(P.ang)*780,vy:Math.cos(P.ang)*780,life:1});fx.push({x:P.x+Math.sin(P.ang)*18,y:P.y+Math.cos(P.ang)*18,life:.2,max:.2});if(P.ammo===0){toast('ПЕРЕЗАРЯДКА');setTimeout(()=>P.ammo=18,850)}}
+function carToggle(){if(inCar){inCar=false;P.x+=35;car=null;toast('ВЫ ВЫШЛИ ИЗ АВТОМОБИЛЯ');return}let n=null,md=70;for(const c of cars){let q=d(P,c);if(q<md){md=q;n=c}}if(n){car=n;inCar=true;toast('АВТОМОБИЛЬ: УПРАВЛЕНИЕ АКТИВНО')}}
+addEventListener('keydown',e=>{keys.add(e.code);if(e.code==='Tab'){e.preventDefault();const b=document.getElementById('board');b.style.display=b.style.display==='block'?'none':'block'}if(e.code==='KeyE'||e.code==='KeyF')carToggle();if(e.code==='Space'&&!inCar&&P.jump<=0)P.jump=.7});
+addEventListener('keyup',e=>keys.delete(e.code));addEventListener('mousedown',e=>{if(e.button===0)shoot()});
+function touch(id,code){const e=document.getElementById(id);if(!e)return;e.addEventListener('pointerdown',()=>keys.add(code));e.addEventListener('pointerup',()=>keys.delete(code));e.addEventListener('pointercancel',()=>keys.delete(code))}
+touch('up','KeyW');touch('down','KeyS');touch('left','KeyA');touch('right','KeyD');document.getElementById('fire').addEventListener('pointerdown',shoot);document.getElementById('carbtn').addEventListener('pointerdown',carToggle);
 
-    <div id="minimap" class="glass">
-      <canvas id="map" width="190" height="190"></canvas>
-      <div class="map-label">VICE DISTRICT</div>
-    </div>
-
-    <div id="weapon">
-      <div class="weapon-name">COMPACT 9</div>
-      <div class="ammo"><b id="ammo">18</b> / 108</div>
-    </div>
-
-    <div id="controls" class="glass">
-      <b>WASD</b> move &nbsp; <b>SHIFT</b> sprint &nbsp; <b>SPACE</b> jump &nbsp;
-      <b>CTRL</b> crouch &nbsp; <b>E</b> vehicle &nbsp; <b>F</b> exit &nbsp; <b>LMB</b> fire &nbsp; <b>TAB</b> stats
-    </div>
-
-    <div id="scoreboard" class="glass hidden">
-      <h2>PLAYERS</h2>
-      <div class="row"><span>YOU</span><b>2,450</b><em>ONLINE</em></div>
-      <div class="row"><span>NightRunner</span><b>1,980</b><em>ONLINE</em></div>
-      <div class="row"><span>MiamiKid</span><b>1,420</b><em>ONLINE</em></div>
-      <div class="row"><span>Sunset</span><b>860</b><em>ONLINE</em></div>
-    </div>
-
-    <div id="loading">
-      <div class="loader-ring"></div>
-      <div class="loading-title">URBAN CLASH</div>
-      <div class="loading-sub">VICE DISTRICT</div>
-      <div class="loading-status" id="loadingStatus">Инициализация 3D мира…</div>
-    </div>
-
-    <div id="damage"></div>
-  </div>
-
-  <script type="module" src="./main.js"></script>
+let last=performance.now();function loop(now){const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);drawWorld();mapDraw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+const st=document.getElementById('loadStatus');setTimeout(()=>st.textContent='Генерация города, транспорта и персонажей…',250);setTimeout(()=>st.textContent='Проверка управления…',600);setTimeout(()=>{document.getElementById('loading').style.opacity=0;setTimeout(()=>document.getElementById('loading').remove(),700);toast('VICE DISTRICT ГОТОВ — ИГРА ЗАПУЩЕНА',2200)},1000);
+})();
+</script>
 </body>
 </html>
