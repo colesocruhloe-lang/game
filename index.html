@@ -1,32 +1,4 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Urban Clash — Team Battle</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <div id="hud">
-    <div class="topbar">
-      <div class="brand">URBAN CLASH</div>
-      <div class="team red">RED <span id="redScore">0</span></div>
-      <div class="team blue">BLUE <span id="blueScore">0</span></div>
-      <div class="hint">TAB — счёт</div>
-    </div>
-    <div id="scoreboard" class="hidden">
-      <h2>СЧЁТ</h2>
-      <div class="score-row"><b class="redText">RED TEAM</b><span id="boardRed">0</span></div>
-      <div class="score-row"><b class="blueText">BLUE TEAM</b><span id="boardBlue">0</span></div>
-    </div>
-    <div id="crosshair">+</div>
-    <div id="status">Загрузка…</div>
-    <div id="controls">
-      <b>WASD</b> движение · <b>SHIFT</b> бег · <b>CTRL</b> присесть · <b>E</b> взаимодействие ·
-      <b>ЛКМ</b> стрелять · <b>SPACE</b> прыжок/взлёт · <b>F</b> транспорт · <b>TAB</b> счёт
-    </div>
-  </div>
-  <div id="loading"><div>Загрузка карты…</div></div>
-  <script type="module" src="./main.js"></script>
-</body>
-</html>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Urban Clash</title><link rel="stylesheet" href="./style.css"></head><body>
+<div id="hud"><div class="top"><b>URBAN CLASH</b><span id="team"></span><span>❤️ <i id="hp">100</i></span><span class="muted">TAB — игроки</span><span class="muted" id="net">OFFLINE</span></div>
+<div id="board" class="hide"><h2>ИГРОКИ</h2><div id="rows"></div></div><div id="cross">+</div><div id="hint">WASD движение · SHIFT бег · CTRL присесть · SPACE прыжок · E/F транспорт · ЛКМ оружие</div><div id="toast"></div></div>
+<div id="load">Подключение к игре…</div><script type="module" src="./main.js"></script></body></html>
