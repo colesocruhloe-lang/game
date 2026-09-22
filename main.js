@@ -20,6 +20,7 @@ let scene, camera, renderer, clock;
 let player, playerBody, weapon, vehicle = null;
 let inVehicle = false, crouched = false, jumping = false;
 let cameraYaw = 0, cameraPitch = 0.18;
+let cameraMode = "third"; // third = GTA-style over-shoulder, first = first-person
 let hp=100, armor=50, cash=2450, ammo=18, wanted=0;
 let missionProgress=0, fireCooldown=0, damageCooldown=0;
 const keys = new Set();
@@ -181,6 +182,7 @@ function setupInput(){
   addEventListener("keydown",e=>{
     keys.add(e.code);
     if(e.code==="Tab"){e.preventDefault();scoreboard.classList.toggle("hidden");}
+    if(e.code==="KeyV"){cameraMode=cameraMode==="third"?"first":"third"; updateCameraModeUI(); toast(cameraMode==="third"?"КАМЕРА: ОТ ТРЕТЬЕГО ЛИЦА":"КАМЕРА: ОТ ПЕРВОГО ЛИЦА");}
     if(e.code==="KeyE") enterVehicle();
     if(e.code==="KeyF") exitVehicle();
     if(e.code==="ControlLeft"||e.code==="ControlRight"){crouched=true; player.scale.y=.72;}
@@ -279,20 +281,36 @@ function updateParticles(dt){
 }
 function updateCamera(dt){
   const focus=inVehicle?vehicle.position:player.position;
-  const distance=inVehicle?9.5:7.0;
-  const height=inVehicle?4.0:3.25;
+  if(cameraMode==="first" && !inVehicle){
+    const head=focus.clone().add(new THREE.Vector3(0,1.62,0));
+    const forward=new THREE.Vector3(Math.sin(cameraYaw)*Math.cos(cameraPitch),Math.sin(cameraPitch),Math.cos(cameraYaw)*Math.cos(cameraPitch));
+    const desired=head.clone();
+    camera.position.lerp(desired,1-Math.pow(.0003,dt));
+    camera.lookAt(head.clone().add(forward.multiplyScalar(20)));
+    player.visible=false;
+    return;
+  }
+  player.visible=true;
+  const distance=inVehicle?9.5:7.4;
+  const height=inVehicle?3.8:3.0;
   const horizontal=Math.cos(cameraPitch)*distance;
+  // Over-the-shoulder: deliberately behind and slightly to the right, never top-down.
+  const shoulder= inVehicle ? 0 : 1.15;
   const desired=new THREE.Vector3(
-    focus.x-Math.sin(cameraYaw)*horizontal,
+    focus.x-Math.sin(cameraYaw)*horizontal + Math.cos(cameraYaw)*shoulder,
     focus.y+height+Math.sin(cameraPitch)*distance,
-    focus.z-Math.cos(cameraYaw)*horizontal
+    focus.z-Math.cos(cameraYaw)*horizontal - Math.sin(cameraYaw)*shoulder
   );
   camera.position.lerp(desired,1-Math.pow(.0008,dt));
   const lookTarget=focus.clone();
-  lookTarget.y+=inVehicle?1.25:1.35;
-  lookTarget.x+=Math.sin(cameraYaw)*1.4;
-  lookTarget.z+=Math.cos(cameraYaw)*1.4;
+  lookTarget.y+=inVehicle?1.25:1.25;
+  lookTarget.x+=Math.sin(cameraYaw)*1.8;
+  lookTarget.z+=Math.cos(cameraYaw)*1.8;
   camera.lookAt(lookTarget);
+}
+function updateCameraModeUI(){
+  const el=document.getElementById("cameraMode");
+  if(el) el.textContent=cameraMode==="third"?"3RD PERSON":"1ST PERSON";
 }
 function updateUI(){
   hpEl.textContent=Math.max(0,Math.round(hp)); armorEl.textContent=Math.max(0,Math.round(armor)); wantedEl.textContent="★".repeat(Math.ceil(wanted))+"☆".repeat(5-Math.ceil(wanted));
