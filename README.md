@@ -1,9 +1,8 @@
 # Urban Clash — Vice District
 
-Оригинальный браузерный 3D vertical slice в формате third-person open-world action.
+Standalone WebGL 3D game. No CDN, no external libraries.
 
-В этой сборке камера находится за персонажем, игрок видит своего человека в мире и управляет им по принципу современной open-world игры. Есть город, здания, дороги, NPC, автомобили, стрельба, прыжок, бег, миссия, wanted, деньги и мини-карта.
+Third-person is the default. Press V for first-person.
+WASD move, Shift sprint, Space jump, mouse look, LMB fire, E/F vehicle.
 
-Управление: WASD — движение относительно камеры; Shift — бег; Space — прыжок; мышь — обзор камеры; ЛКМ — стрельба; E — сесть в автомобиль; F — выйти; Tab — список игроков.
-
-Используется Three.js из официального CDN. Проект не содержит оригинальных ассетов, кода или материалов Rockstar.
+Original game assets and code only; not a copy of GTA/Rockstar assets.
