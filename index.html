@@ -1,1 +1,76 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Urban Clash — Vice District</title><link rel="stylesheet" href="style.css"></head><body><canvas id="game"></canvas><div id="hud"><div class="top"><b>URBAN CLASH</b><span>VICE DISTRICT</span><i>HP <strong id="hp">100</strong></i><i>ARM <strong id="arm">50</strong></i><i>CASH <strong id="cash">$2,450</strong></i><i>WANTED <strong id="wanted">☆☆☆☆☆</strong></i><i id="mode">3RD PERSON</i></div><div id="mission"><small>CURRENT OBJECTIVE</small><strong id="missionText">Доберитесь до жёлтой отметки</strong></div><canvas id="map" width="180" height="180"></canvas><div id="cross">+</div><div id="prompt">E — сесть в автомобиль</div><div id="toast"></div><div id="weapon">COMPACT 9<br><strong id="ammo">18</strong> / 108</div><div id="help">WASD движение · SHIFT бег · SPACE прыжок · V 1st/3rd person · мышь обзор · ЛКМ огонь · E авто</div><div id="loading"><div class="spinner"></div><h1>URBAN CLASH</h1><small>VICE DISTRICT</small><p id="loadText">Запуск 3D мира…</p></div><div id="error"></div></div><script src="main.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1a0f2e">
+<title>Urban Clash — Vice District</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div id="tr">
+    <div id="clock">17:30</div>
+    <div id="wbox">
+      <svg viewBox="0 0 64 32" aria-hidden="true"><path d="M4 8h44l4-3h8v8H44l-3 3h-9l-4 12h-9l3-12H4z" fill="currentColor"/></svg>
+      <div id="ammo">18<small>/108</small></div>
+    </div>
+    <div id="cash">$2,450</div>
+    <div id="stars"><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></div>
+  </div>
+
+  <div id="radar">
+    <canvas id="map" width="240" height="240"></canvas>
+    <div class="bars"><div class="bar hp"><b id="hpb"></b></div><div class="bar arm"><b id="armb"></b></div></div>
+  </div>
+
+  <div id="obj"><small>Задание</small><strong id="objText">—</strong><span id="objInfo"></span></div>
+  <div id="cross"><i></i><i></i><i></i><i></i></div>
+  <div id="prompt"></div>
+  <div id="toast"></div>
+  <div id="banner"><h2 id="bannerT"></h2><p id="bannerS"></p></div>
+  <div id="zone"></div>
+  <div id="veh"><b id="vehName"></b><span id="radioName"></span></div>
+  <div id="help">WASD — движение · Shift — бег · Space — прыжок / ручник · Мышь — обзор · ЛКМ — огонь · ПКМ — прицел · R — перезарядка · E — машина · V — камера · Q — радио · M — звук</div>
+  <div id="dmg"></div>
+  <div id="dead"><h1 id="deadT"></h1><p id="deadS"></p></div>
+</div>
+
+<div id="start">
+  <div class="sun"></div>
+  <div class="st-in">
+    <h1 class="logo"><span class="l1">Urban</span><span class="l2">Clash</span><span class="l3">Vice District</span></h1>
+    <p class="tag">Неоновый город у океана. Угоняй машины, катайся по набережной, уходи от полиции.</p>
+    <button id="play" disabled>Загрузка…</button>
+    <p id="loadText">Строим город…</p>
+    <div class="keys">
+      <span><b>WASD</b> движение</span><span><b>Shift</b> бег</span><span><b>Мышь</b> обзор</span><span><b>ЛКМ</b> огонь</span>
+      <span><b>E</b> сесть / выйти</span><span><b>Space</b> ручник</span><span><b>V</b> вид от 1-го лица</span><span><b>Q</b> радио</span>
+    </div>
+    <p class="disc">Оригинальная фан-игра в жанре open world. Не связана с Rockstar Games и не использует их материалы.</p>
+  </div>
+</div>
+
+<div id="pause"><div><b>Пауза</b><span>Кликните, чтобы продолжить</span></div></div>
+
+<div id="touchui">
+  <div id="joy"><div id="knob"></div></div>
+  <div id="tbtns">
+    <button data-k="fire" class="big">Огонь</button>
+    <button data-k="jump">Прыжок</button>
+    <button data-k="car">Авто</button>
+    <button data-k="run">Бег</button>
+    <button data-k="cam">Камера</button>
+    <button data-k="radio">Радио</button>
+  </div>
+</div>
+
+<div id="error"></div>
+<script src="main.js"></script>
+</body>
+</html>
